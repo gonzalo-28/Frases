@@ -17,7 +17,6 @@ export type Quote = {
  * Ordered as a stable, human-readable list; selection order does not depend on it.
  */
 export const quotes: readonly Quote[] = [
-  { text: 'Todo lo que puedes imaginar es real.', author: 'Pablo Picasso' },
   {
     text: 'El éxito no es final, el fracaso no es fatal: lo importante es la fuerza para continuar.',
     author: 'Winston Churchill',
@@ -45,10 +44,6 @@ export const quotes: readonly Quote[] = [
   {
     text: 'La libertad consiste en poder hacer todo lo que no está prohibido por la ley.',
     author: 'Immanuel Kant',
-  },
-  {
-    text: 'Todos somos el universo mirando en sí mismo.',
-    author: 'John Barrow',
   },
   {
     text: 'Quien tiene la razón nunca está solo.',

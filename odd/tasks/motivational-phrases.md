@@ -118,8 +118,8 @@ real outcome. It has been corrected. Two errors were substantive, not cosmetic:
   PR can still be merged. Enabling it is a repository setting in the GitHub UI, not
   a code change, and it is deliberately left to the user because it also blocks
   emergency merges.
-- `data-testid` attributes ship in production markup. The dataset has 23 quotes but
-  only 17 unique authors, so the author element cannot be found by text query.
+- `data-testid` attributes ship in production markup. The dataset has 21 quotes but
+  only 15 unique authors, so the author element cannot be found by text query.
   Acceptable for now; ARIA-only querying is the alternative.
 - No deployment. The app runs locally via `npm run dev`; it is not published to a URL.
 - The README documents commands but not a clone-from-scratch walkthrough.

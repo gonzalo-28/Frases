@@ -37,9 +37,18 @@ function countingFixedRng(roll: number): { rng: () => number; calls: () => numbe
   }
 }
 
-/** Dataset entry at `index`, for asserting which phrase a roll maps to. */
-function quoteAt(index: number): Quote {
-  return quotes[index]!
+/**
+ * The dataset entry that `roll` selects, mirroring how `pickRandomQuote`
+ * indexes: `floor(roll * candidates.length)` over the pool left once
+ * `previousIndex` is excluded.
+ *
+ * Deriving the index instead of hardcoding it keeps these assertions true
+ * across dataset edits — adding or removing a phrase shifts every index but
+ * must not invalidate a single test in this file.
+ */
+function quoteForRoll(roll: number, previousIndex: number | null = null): Quote {
+  const candidates = quotes.filter((_, index) => index !== previousIndex)
+  return candidates[Math.floor(roll * candidates.length)]!
 }
 
 const DRAW_BUTTON_NAME = 'Nueva frase'
@@ -100,14 +109,14 @@ describe('App initial render', () => {
 
 describe('App drawing a phrase', () => {
   it('renders a phrase and its author after a click', async () => {
-    // Roll 0.5 clears the 5% sleep check and maps to floor(0.5 * 23) = 11.
+    // The first roll clears the 5% sleep check; the second one picks the phrase.
     render(<App rng={sequenceRng(0.5, 0.5)} />)
 
     await clickDraw()
 
     expectSingleState('quote')
-    expect(screen.getByTestId('quote-text')).toHaveTextContent(quoteAt(11).text)
-    expect(screen.getByTestId('quote-author')).toHaveTextContent(quoteAt(11).author)
+    expect(screen.getByTestId('quote-text')).toHaveTextContent(quoteForRoll(0.5).text)
+    expect(screen.getByTestId('quote-author')).toHaveTextContent(quoteForRoll(0.5).author)
   })
 
   it('renders the phrase and the author as separate, individually findable elements', async () => {
@@ -122,9 +131,9 @@ describe('App drawing a phrase', () => {
     expect(author).toBeInTheDocument()
     // Distinct nodes: the author is not baked into the phrase string.
     expect(phrase).not.toContainElement(author)
-    expect(phrase.textContent).not.toContain(quoteAt(11).author)
-    expect(author.textContent).not.toContain(quoteAt(11).text)
-    expect(author.textContent).toBe(quoteAt(11).author)
+    expect(phrase.textContent).not.toContain(quoteForRoll(0.5).author)
+    expect(author.textContent).not.toContain(quoteForRoll(0.5).text)
+    expect(author.textContent).toBe(quoteForRoll(0.5).author)
   })
 
   it('uses semantic elements for the quotation and its attribution', async () => {
@@ -158,7 +167,7 @@ describe('App drawing a phrase', () => {
       // The spy firing proves the default random source is Math.random itself.
       expect(random).toHaveBeenCalled()
       expectSingleState('quote')
-      expect(screen.getByTestId('quote-text')).toHaveTextContent(quoteAt(11).text)
+      expect(screen.getByTestId('quote-text')).toHaveTextContent(quoteForRoll(0.5).text)
     } finally {
       random.mockRestore()
     }
@@ -197,7 +206,7 @@ describe('App sleep message', () => {
 
     await clickDraw()
     const drawn = screen.getByTestId('quote-text').textContent
-    expect(drawn).toBe(quoteAt(0).text)
+    expect(drawn).toBe(quoteForRoll(0).text)
 
     await clickDraw()
 
@@ -222,8 +231,9 @@ describe('App sleep message', () => {
     const next = screen.getByTestId('quote-text').textContent
     expect(next).not.toBe(drawn)
     // Sleeping must not discard the no-repeat preference from before the nap:
-    // quotes[0] stays excluded, so the pool is 22 and 0.5 maps to quotes[12].
-    expect(next).toBe(quoteAt(12).text)
+    // the first phrase stays excluded, so the second roll indexes the pool
+    // without it and lands on a different entry.
+    expect(next).toBe(quoteForRoll(0.5, 0).text)
     expect(screen.queryByTestId('sleep-message')).not.toBeInTheDocument()
   })
 
@@ -246,20 +256,20 @@ describe('App sleep message', () => {
 
 describe('App repeat avoidance', () => {
   it('passes previous so two clicks in a row never show the same phrase', async () => {
-    // 0.5 maps to floor(0.5 * 23) = 11 without a filter, and to
-    // floor(0.5 * 22) = 11 within a filtered pool, i.e. a different entry.
-    // Without `previous` both clicks would render quotes[11] and this fails.
+    // The same roll indexes the full pool on the first click and the pool minus
+    // the first phrase on the second, so the two clicks must differ. Without
+    // `previous` both clicks would render the same entry and this fails.
     render(<App rng={countingFixedRng(0.5).rng} />)
 
     await clickDraw()
     const first = screen.getByTestId('quote-text').textContent
-    expect(first).toBe(quoteAt(11).text)
+    expect(first).toBe(quoteForRoll(0.5).text)
 
     await clickDraw()
     const second = screen.getByTestId('quote-text').textContent
 
     expect(second).not.toBe(first)
-    expect(second).toBe(quoteAt(12).text)
+    expect(second).toBe(quoteForRoll(0.5, quotes.indexOf(quoteForRoll(0.5))).text)
   })
 
   it('never repeats the previous phrase across a long scripted session', async () => {

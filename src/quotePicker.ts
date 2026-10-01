@@ -17,10 +17,10 @@ export const SLEEP_PROBABILITY = 0.05
 /**
  * Message shown instead of a phrase when {@link shouldSleep} returns true.
  *
- * Accented per standard Spanish orthography. The feature doc renders the same
- * message unaccented ("Me quede sin frases, anda y duerme!"); that discrepancy
- * is unresolved upstream. This constant is the single source of truth for the
- * UI — change it here, in one place, if the other spelling wins.
+ * Accented per standard Spanish orthography, per the spelling the user settled
+ * on (recorded in `odd/tasks/motivational-phrases.md`). This constant is the
+ * single source of truth for the UI — change it here, in one place, if the
+ * wording ever changes.
  */
 export const SLEEP_MESSAGE = 'Me quedé sin frases, andá y dormí!'
 
