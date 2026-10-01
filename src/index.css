@@ -1,14 +1,174 @@
 /*
- * Minimal global baseline.
+ * Styling for the motivational phrases page.
  *
- * Deliberately free of theme and layout decisions: T2 owns the page styling, so
- * this only sets sensible defaults and stays out of the way.
+ * Plain CSS with a small set of custom properties: no framework, no build-time
+ * dependency. The layout is fluid by default and only caps its width on wide
+ * viewports, so the card stays comfortable from a 320px phone to a desktop.
  */
+
+:root {
+  color-scheme: light;
+
+  --surface: #fffdf9;
+  --ink: #1f1b16;
+  --ink-muted: #5c554b;
+  --accent: #1f1b16;
+  --accent-hover: #38312a;
+  --accent-ink: #fffdf9;
+  --page-top: #f4ece1;
+  --page-bottom: #e6ded3;
+  --radius: 14px;
+  --shadow: 0 18px 40px -24px rgb(31 27 22 / 45%);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+}
 
 body {
   margin: 0;
-  font-family: system-ui, 'Segoe UI', Roboto, sans-serif;
-  line-height: 1.45;
+  min-height: 100vh;
+  /* dvh keeps the card centred when mobile browser chrome collapses. */
+  min-height: 100dvh;
+  display: grid;
+  place-items: center;
+  padding: clamp(1rem, 4vw, 3rem);
+  color: var(--ink);
+  font-family: system-ui, 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
+  line-height: 1.5;
+  background: linear-gradient(180deg, var(--page-top), var(--page-bottom));
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+.page {
+  width: 100%;
+}
+
+.card {
+  display: grid;
+  gap: clamp(1.25rem, 4vw, 2rem);
+  max-width: 34rem;
+  margin-inline: auto;
+  padding: clamp(1.5rem, 5vw, 2.75rem);
+  background: var(--surface);
+  border: 1px solid rgb(31 27 22 / 8%);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+}
+
+.card__title {
+  margin: 0;
+  color: var(--ink-muted);
+  font-size: clamp(0.95rem, 2.4vw, 1.1rem);
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  text-align: center;
+}
+
+/*
+ * A fixed minimum height keeps the button from jumping between a two-word
+ * phrase and a long one, and centres the output block vertically.
+ */
+.card__output {
+  display: grid;
+  align-content: center;
+  min-height: clamp(9rem, 30vh, 12rem);
+  text-align: center;
+}
+
+.quote {
+  margin: 0;
+}
+
+/* The phrase is the point of the page, so it leads in size and contrast. */
+.quote__text {
+  margin: 0;
+  font-family: Georgia, 'Times New Roman', serif;
+  font-size: clamp(1.35rem, 4.5vw, 1.9rem);
+  line-height: 1.35;
+  text-wrap: balance;
+}
+
+.quote__author {
+  margin-top: clamp(0.85rem, 3vw, 1.1rem);
+  color: var(--ink-muted);
+  font-size: clamp(0.9rem, 2.4vw, 1rem);
+}
+
+/* A citation is a proper noun, not an emphasised aside. */
+.quote__author cite {
+  font-style: normal;
+}
+
+.sleep {
+  margin: 0;
+  font-size: clamp(1.2rem, 4vw, 1.5rem);
+  font-weight: 600;
+  line-height: 1.4;
+  text-wrap: balance;
+}
+
+.hint {
+  margin: 0;
+  color: var(--ink-muted);
+  font-size: clamp(1rem, 2.6vw, 1.1rem);
+  text-wrap: balance;
+}
+
+.draw-button {
+  justify-self: center;
+  padding: 0.7rem 1.6rem;
+  /* Comfortable touch target on phones without inflating the visual weight. */
+  min-height: 2.75rem;
+  color: var(--accent-ink);
+  font: inherit;
+  font-weight: 600;
+  background: var(--accent);
+  border: 0;
+  border-radius: 999px;
+  cursor: pointer;
+  transition: background-color 120ms ease, transform 120ms ease;
+}
+
+.draw-button:hover {
+  background: var(--accent-hover);
+}
+
+.draw-button:active {
+  transform: translateY(1px);
+}
+
+/* The button is the only interactive element, so its focus ring must survive. */
+.draw-button:focus-visible {
+  outline: 3px solid var(--accent);
+  outline-offset: 3px;
+}
+
+/*
+ * Motion is opt-in: the entrance animation only exists when the reader has not
+ * asked for reduced motion.
+ */
+@media (prefers-reduced-motion: no-preference) {
+  .quote,
+  .sleep {
+    animation: fade-in 220ms ease-out;
+  }
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+
+  to {
+    opacity: 1;
+    transform: none;
+  }
 }
