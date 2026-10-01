@@ -11,19 +11,61 @@ With a **5% probability** per click, it shows a different message instead:
 Vite + React + TypeScript, with Vitest for tests. No backend, no API calls, no state
 persistence — the phrase dataset lives in the repository.
 
-## Commands
+## Requirements
+
+Node 22 or newer. Nothing else — no database, no API keys, no environment
+variables.
+
+## Getting started
 
 ```bash
-npm install     # install dependencies
-npm run dev     # start the dev server
-npm test        # run the test suite once
-npm run test:watch
-npm run lint    # oxlint
-npm run build   # typecheck + production build
-npm run preview # serve the production build locally
+git clone https://github.com/gonzalo-28/Frases.git
+cd Frases
+npm install
+npm run dev
 ```
 
-Requires Node 22+.
+Then open http://localhost:5173. Click **Nueva frase**.
+
+To reach it from another device on the same network, run
+`npm run dev -- --host` and use the Network address Vite prints.
+
+## Commands
+
+| Command | What it does |
+| --- | --- |
+| `npm install` | Install dependencies from `package-lock.json` |
+| `npm run dev` | Start the dev server with hot reload |
+| `npm test` | Run the test suite once |
+| `npm run test:watch` | Run tests and re-run on change |
+| `npm run lint` | Lint with oxlint |
+| `npm run build` | Typecheck (`tsc -b`) then build for production |
+| `npm run preview` | Serve the production build locally |
+
+## Continuous integration
+
+`.github/workflows/ci.yml` runs `npm ci`, `npm test`, `npm run build`, and
+`npm run lint` on every push and every pull request. A failing check shows on the
+PR and is visible before merging.
+
+Note that the check is *reported* but not *enforced*: GitHub warns on a failing
+check but does not block the merge. Branch protection, which turns the warning
+into a hard gate, is not enabled in this repository.
+
+## Project structure
+
+```
+src/
+  quotePicker.ts        probability and selection logic, no React
+  quotes.ts             the quote dataset
+  App.tsx               the page: state and rendering only
+  quotePicker.test.ts   unit tests for the logic
+  App.test.tsx          component tests for the page
+.github/workflows/
+  ci.yml                the CI pipeline
+odd/tasks/
+  motivational-phrases.md   feature doc: scope, decisions, delivery record
+```
 
 ## How it works
 
@@ -52,3 +94,18 @@ the 5% branch deterministically instead of stubbing `Math.random`.
 - `src/App.test.tsx` — rendering and click behaviour: a click shows a phrase and
   author, the sleep message replaces the phrase, and the two are never visible
   at the same time.
+
+## Changing things
+
+- **The sleep message** — `SLEEP_MESSAGE` in `src/quotePicker.ts`. It is the only
+  place the text is defined.
+- **The 5% rate** — `SLEEP_PROBABILITY` in the same file.
+- **The phrases** — `src/quotes.ts`, a plain typed array of `{ text, author }`.
+  Adding an entry needs no other change.
+
+## Known gaps
+
+- No deployment: the app runs locally, it is not published to a URL.
+- `data-testid` attributes ship in production markup.
+- See `odd/tasks/motivational-phrases.md` for the full record, including the
+  decisions behind the design and the delivery history.
